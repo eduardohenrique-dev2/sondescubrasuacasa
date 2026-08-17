@@ -50,13 +50,26 @@
     toast: $("toast"),
     notice: $("returning-notice"),
     noticeText: $("notice-text"),
-    noticeClose: $("notice-close")
+    noticeClose: $("notice-close"),
+    floatingJoin: $("floating-join"),
+    floatingJoinShield: $("floating-join-shield"),
+    floatingJoinTitle: $("floating-join-title"),
+    floatingJoinSubtitle: $("floating-join-subtitle"),
+    floatingJoinBtn: $("floating-join-btn"),
+    floatingJoinBtnLabel: $("floating-join-btn-label"),
+    floatingJoinClose: $("floating-join-close")
   };
 
   // "questions" guarda o conjunto sorteado e embaralhado desta
   // tentativa (perguntas + ordem das alternativas). É montado uma
   // única vez, no início do teste (ver btn-start em init()).
   const state = { index: 0, answers: [], questions: [] };
+
+  // CTA flutuante do resultado — referências globais ao(s) timer(s)
+  // para evitar duplicação caso renderResult() rode mais de uma vez.
+  const FLOATING_JOIN_MS = 60000;
+  let floatingJoinTimer = null;
+  let floatingJoinHideTimer = null;
 
   /* ---------- escudos ---------- */
   function shieldMarkup(key) {
@@ -401,6 +414,48 @@
     );
   }
 
+  /* CTA flutuante temporário: reutiliza escudo/nome/link já
+     calculados pelo resultado — não duplica lógica de negócio,
+     não hardcoda URLs. Some sozinho após 60s ou ao ser fechado. */
+  function clearFloatingJoinTimers() {
+    if (floatingJoinTimer) { window.clearTimeout(floatingJoinTimer); floatingJoinTimer = null; }
+    if (floatingJoinHideTimer) { window.clearTimeout(floatingJoinHideTimer); floatingJoinHideTimer = null; }
+  }
+
+  function hideFloatingJoin() {
+    if (floatingJoinTimer) { window.clearTimeout(floatingJoinTimer); floatingJoinTimer = null; }
+    if (!el.floatingJoin || el.floatingJoin.hidden) return;
+    el.floatingJoin.classList.remove("visible");
+    floatingJoinHideTimer = window.setTimeout(() => {
+      el.floatingJoin.hidden = true;
+      floatingJoinHideTimer = null;
+    }, reduce ? 60 : 650);
+  }
+
+  function showFloatingJoin(house, href) {
+    if (!el.floatingJoin) return;
+
+    // evita CTAs/timers duplicados se o resultado for renderizado de novo
+    clearFloatingJoinTimers();
+    el.floatingJoin.classList.remove("visible");
+    el.floatingJoin.hidden = false;
+
+    el.floatingJoinShield.src = house.image;
+    el.floatingJoinShield.alt = "Escudo da " + house.name;
+    el.floatingJoinTitle.textContent = "Sua Casa é " + house.name + ".";
+    el.floatingJoinSubtitle.textContent = "Entre agora na sua Casa.";
+    el.floatingJoinBtnLabel.textContent = "Entrar na " + house.name;
+    el.floatingJoinBtn.href = href;
+    el.floatingJoinBtn.setAttribute("aria-label", "Entrar na " + house.name);
+
+    // força reflow para garantir que a transição de entrada rode
+    // mesmo quando o elemento acabou de sair de [hidden]
+    void el.floatingJoin.offsetWidth;
+    el.floatingJoin.classList.add("visible");
+
+    floatingJoinTimer = window.setTimeout(hideFloatingJoin, FLOATING_JOIN_MS);
+  }
+
   function renderResult(result) {
     const house = HOUSES[result.winner];
 
@@ -452,6 +507,10 @@
     label.textContent = "Entrar na " + house.name;
     $("btn-join-shield").src = house.image;
     $("btn-join").href = joinLink(house, result.compat);
+
+    // CTA flutuante reaproveita exatamente o mesmo link já resolvido
+    // acima para o botão original — sem recalcular nem hardcodar nada.
+    showFloatingJoin(house, $("btn-join").href);
 
     show("result");
     window.setTimeout(() => {
@@ -613,6 +672,7 @@
     $("btn-back").addEventListener("click", goBack);
     $("btn-share").addEventListener("click", share);
     el.noticeClose.addEventListener("click", hideReturningNotice);
+    if (el.floatingJoinClose) el.floatingJoinClose.addEventListener("click", hideFloatingJoin);
 
     // navegação por teclado no radiogroup das alternativas
     el.options.addEventListener("keydown", (ev) => {

@@ -56,6 +56,21 @@
   <p class="notice-text" id="notice-text"></p>
 </div>
 
+<!-- CTA flutuante temporário: aparece ao revelar o resultado (ver renderResult() em app.js) -->
+<div class="floating-join" id="floating-join" role="region" aria-label="Acesso rápido para entrar na sua Casa" hidden>
+  <button class="floating-join-close" id="floating-join-close" type="button" aria-label="Fechar aviso de acesso rápido">&times;</button>
+  <div class="floating-join-content">
+    <img class="floating-join-shield" id="floating-join-shield" src="" alt="" width="48" height="64">
+    <div class="floating-join-message">
+      <p class="floating-join-title" id="floating-join-title">Sua Casa foi revelada!</p>
+      <p class="floating-join-subtitle" id="floating-join-subtitle">Entre agora na sua Casa.</p>
+    </div>
+  </div>
+  <a class="btn floating-join-button" id="floating-join-btn" href="#" target="_blank" rel="noopener" aria-label="Entrar na Casa">
+    <span id="floating-join-btn-label">Entrar na Casa</span>
+  </a>
+</div>
+
 <main class="app">
 
   <!-- ==================== 1. LANDING ==================== -->

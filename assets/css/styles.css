@@ -697,6 +697,107 @@ footer {
 }
 .btn-join img { width: 1.35rem; }
 
+/* ---------- 10-B. CTA FLUTUANTE (entrada rápida no resultado) ---------- */
+.floating-join {
+  position: fixed;
+  left: 1rem;
+  right: 1rem;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 25;
+  margin: 0 auto;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--gold-dim);
+  background:
+    linear-gradient(180deg, rgba(212, 175, 55, 0.08), transparent 55%),
+    rgba(5, 5, 7, 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(212, 175, 55, 0.05) inset;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, 20px, 0) scale(0.96);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), visibility 0s linear 0.6s;
+  pointer-events: none;
+}
+.floating-join[hidden] { display: none; }
+.floating-join.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0) scale(1);
+  pointer-events: auto;
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), visibility 0s linear 0s;
+}
+
+.floating-join-content {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-right: 1.1rem;
+}
+.floating-join-shield {
+  width: 2.6rem;
+  height: auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 14px rgba(212, 175, 55, 0.3));
+}
+.floating-join-message { text-align: left; min-width: 0; }
+.floating-join-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+.floating-join-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.68);
+}
+.floating-join-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: var(--grey);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color 0.2s var(--ease), background 0.2s var(--ease);
+}
+.floating-join-close:hover, .floating-join-close:focus-visible {
+  color: var(--gold-soft);
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.floating-join-button {
+  width: 100%;
+  border: none;
+  background: linear-gradient(135deg, #0F7A3D, #1FA84F);
+  color: var(--white);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  box-shadow: 0 12px 26px rgba(31, 168, 79, 0.22);
+  animation: floatingJoinPulse 2.6s ease-in-out infinite;
+}
+
+@keyframes floatingJoinPulse {
+  0%, 100% { box-shadow: 0 12px 26px rgba(31, 168, 79, 0.22); }
+  50% { box-shadow: 0 12px 32px rgba(31, 168, 79, 0.4); }
+}
+
 /* ---------- 11. TOAST ---------- */
 .toast {
   position: fixed;
@@ -883,4 +984,5 @@ footer {
   .beam { display: none; }
   .shield-row-lg li.winner img { transform: none; }
   .ripple { display: none; }
+  .floating-join-button { animation: none !important; }
 }
