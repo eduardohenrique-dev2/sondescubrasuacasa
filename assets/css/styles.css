@@ -346,6 +346,24 @@ footer {
 .shield-row li:nth-child(odd) img { animation: shieldPulse 8s ease-in-out infinite; }
 .shield-row li:nth-child(even) img { animation: shieldPulse 8s ease-in-out 1.2s infinite; }
 
+/* Antes do teste, as Casas ficam propositalmente mais discretas.
+   O objetivo é reduzir o viés de escolha sem remover a identidade visual. */
+#landing-shields {
+  opacity: 0.34;
+  transform: scale(0.86);
+  margin-top: 1.8rem;
+  pointer-events: none;
+}
+#landing-shields li img {
+  animation: none !important;
+  filter: grayscale(1) brightness(0.42) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42));
+}
+#landing-shields li::after { opacity: 0 !important; }
+#landing-shields img:hover {
+  transform: none;
+  filter: grayscale(1) brightness(0.42) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.42));
+}
+
 /* escudo da Cruz — 4º item da fileira, aumentado (estava menor que os demais) */
 .shield-row li:nth-child(4) { --slot-w: 5.6rem; --slot-h: 8.3rem; }
 .shield-row-sm li:nth-child(4) { --slot-w: 4.8rem; --slot-h: 4.8rem; }
