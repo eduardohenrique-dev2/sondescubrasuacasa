@@ -5,9 +5,9 @@
 
    NOVIDADES DESTA VERSÃO
    - getRandomQuestions() sorteia 12 perguntas do banco de 40
-     (quiz-data.js -> QUESTION_POOL), garantindo pelo menos uma
-     pergunta de cada categoria e embaralhando a ordem das
-     perguntas e das alternativas. Tudo acontece uma única vez,
+     (quiz-data.js -> QUESTION_POOL), garantindo uma de cada
+     categoria + duas confirmações cruzadas, mantendo perguntas
+     equivalentes afastadas e embaralhando todas as alternativas.
      no clique de "Descobrir minha Casa" (ver init -> btn-start).
    - registerAttempt()/saveAttempt()/loadAttempts() controlam,
      via localStorage, quantas vezes o teste foi feito neste
@@ -24,6 +24,7 @@
   const STORE_KEY = "son_casas_v2";
   const ATTEMPTS_KEY = "son_casas_attempts_v1";
   const QUESTIONS_PER_ATTEMPT = 12;
+  const CROSS_CHECKS_PER_ATTEMPT = 2;
   const MAX_HISTORY = 10;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -127,35 +128,89 @@
   // aleatoriamente e embaralha a ordem final. As alternativas de
   // cada pergunta também são embaralhadas, em uma cópia própria
   // da sessão (o banco original nunca é alterado).
+  function categoriesAreWellSpaced(list, minGap) {
+    const positions = {};
+    list.forEach((q, index) => {
+      if (!positions[q.category]) positions[q.category] = [];
+      positions[q.category].push(index);
+    });
+
+    return Object.values(positions).every((indexes) => {
+      if (indexes.length < 2) return true;
+      for (let i = 1; i < indexes.length; i += 1) {
+        if (indexes[i] - indexes[i - 1] < minGap) return false;
+      }
+      return true;
+    });
+  }
+
+  // Embaralha tentando manter perguntas da mesma categoria afastadas.
+  // Isso evita que a pessoa perceba que duas perguntas estão confirmando
+  // o mesmo traço por ângulos diferentes.
+  function spreadCrossChecks(list) {
+    let best = shuffleArray(list);
+    for (let attempt = 0; attempt < 80; attempt += 1) {
+      const candidate = shuffleArray(list);
+      if (categoriesAreWellSpaced(candidate, 4)) return candidate;
+      if (categoriesAreWellSpaced(candidate, 3)) best = candidate;
+    }
+    return best;
+  }
+
+  // Mantém 12 perguntas:
+  // - 1 pergunta de cada uma das 10 categorias;
+  // - 2 perguntas extras em duas categorias sorteadas, funcionando
+  //   como confirmação cruzada do padrão de resposta.
   function getRandomQuestions(count) {
     const pool = getQuestionPool();
 
     const byCategory = {};
-    CATEGORIES.forEach((c) => { byCategory[c] = []; });
+    CATEGORIES.forEach((category) => { byCategory[category] = []; });
     pool.forEach((q) => {
       if (byCategory[q.category]) byCategory[q.category].push(q);
     });
 
     const picked = [];
     const pickedSet = new Set();
-    CATEGORIES.forEach((c) => {
-      const options = byCategory[c];
-      if (!options || !options.length) return;
+
+    // Base: uma pergunta de cada categoria.
+    CATEGORIES.forEach((category) => {
+      const options = byCategory[category] || [];
+      if (!options.length) return;
       const choice = options[Math.floor(Math.random() * options.length)];
-      if (!pickedSet.has(choice)) {
-        picked.push(choice);
-        pickedSet.add(choice);
-      }
+      picked.push(choice);
+      pickedSet.add(choice);
     });
 
-    const remaining = shuffleArray(pool.filter((q) => !pickedSet.has(q)));
-    let i = 0;
-    while (picked.length < count && i < remaining.length) {
-      picked.push(remaining[i]);
-      i += 1;
+    // Confirmação cruzada: escolhe duas categorias com pelo menos
+    // uma segunda pergunta disponível.
+    let extrasNeeded = Math.max(0, count - picked.length);
+    const crossCheckCategories = shuffleArray(
+      CATEGORIES.filter((category) =>
+        (byCategory[category] || []).some((q) => !pickedSet.has(q))
+      )
+    ).slice(0, Math.min(CROSS_CHECKS_PER_ATTEMPT, extrasNeeded));
+
+    crossCheckCategories.forEach((category) => {
+      const alternatives = (byCategory[category] || []).filter((q) => !pickedSet.has(q));
+      if (!alternatives.length) return;
+      const choice = alternatives[Math.floor(Math.random() * alternatives.length)];
+      picked.push(choice);
+      pickedSet.add(choice);
+      extrasNeeded -= 1;
+    });
+
+    // Segurança para futuras mudanças no número de perguntas.
+    if (extrasNeeded > 0) {
+      const remaining = shuffleArray(pool.filter((q) => !pickedSet.has(q)));
+      for (let i = 0; i < remaining.length && extrasNeeded > 0; i += 1) {
+        picked.push(remaining[i]);
+        pickedSet.add(remaining[i]);
+        extrasNeeded -= 1;
+      }
     }
 
-    return shuffleArray(picked)
+    return spreadCrossChecks(picked)
       .slice(0, count)
       .map((q) => ({
         text: q.text,
@@ -307,17 +362,29 @@
   }
 
   /* ---------- cálculo ---------- */
+  function normalizedWeightEntries(weights) {
+    const entries = Object.entries(weights).filter(([, value]) => Number(value) > 0);
+    const total = entries.reduce((sum, [, value]) => sum + Number(value), 0) || 1;
+    return entries.map(([trait, value]) => [trait, Number(value) / total]);
+  }
+
   function userVector() {
     const v = {};
     TRAITS.forEach((t) => (v[t] = 0));
+
     state.answers.forEach((optIndex, qIndex) => {
       const q = state.questions[qIndex];
       const opt = q && q.options[optIndex];
       if (!opt) return;
-      Object.entries(opt.weights).forEach(([t, w]) => {
-        if (t in v) v[t] += w;
+
+      // Cada resposta soma exatamente 1 ponto no total.
+      // Assim, nenhuma alternativa vale mais só por possuir mais
+      // pesos escritos no banco.
+      normalizedWeightEntries(opt.weights).forEach(([trait, weight]) => {
+        if (trait in v) v[trait] += weight;
       });
     });
+
     return v;
   }
 
@@ -331,33 +398,100 @@
     return dot / (Math.sqrt(na) * Math.sqrt(nb));
   }
 
-  function calculateCompatibility(scores) {
-    // normaliza para uma faixa legível (78% – 99%)
-    const best = scores[0].score;
-    const worst = scores[scores.length - 1].score;
-    const span = Math.max(best - worst, 0.0001);
-    return Math.round(78 + ((best - worst) / span) * 21);
+  function optionVector(option) {
+    const vector = {};
+    TRAITS.forEach((t) => (vector[t] = 0));
+    if (!option) return vector;
+    normalizedWeightEntries(option.weights).forEach(([trait, weight]) => {
+      if (trait in vector) vector[trait] = weight;
+    });
+    return vector;
+  }
+
+  function crossCheckConsistency() {
+    const byCategory = {};
+
+    state.questions.forEach((question, index) => {
+      const answerIndex = state.answers[index];
+      const option = question && question.options[answerIndex];
+      if (!option) return;
+      if (!byCategory[question.category]) byCategory[question.category] = [];
+      byCategory[question.category].push(optionVector(option));
+    });
+
+    const similarities = [];
+    Object.values(byCategory).forEach((vectors) => {
+      if (vectors.length < 2) return;
+      for (let i = 1; i < vectors.length; i += 1) {
+        similarities.push(cosine(vectors[i - 1], vectors[i]));
+      }
+    });
+
+    if (!similarities.length) return 0.5;
+    return similarities.reduce((sum, value) => sum + value, 0) / similarities.length;
+  }
+
+  function calculateCompatibility(scores, consistency) {
+    const best = scores[0] ? scores[0].score : 0;
+    const second = scores[1] ? scores[1].score : 0;
+
+    // 1) Força do encaixe: converte a similaridade de cosseno em
+    //    proximidade angular e suaviza a escala para leitura humana.
+    const boundedBest = Math.max(0, Math.min(1, best));
+    const angularFit = 1 - (Math.acos(boundedBest) / (Math.PI / 2));
+    const profileStrength = Math.sqrt(Math.max(0, angularFit));
+
+    // 2) Separação: mede quanto a Casa vencedora realmente se
+    //    destacou da segunda colocada. Com 6 pontos percentuais de
+    //    diferença ou mais, considera separação máxima.
+    const separation = Math.max(0, Math.min(1, (best - second) / 0.06));
+
+    // 3) Consistência: usa as duas perguntas de confirmação cruzada
+    //    como um ajuste pequeno, sem permitir que elas dominem o teste.
+    const reliability = Math.max(0, Math.min(1, consistency));
+
+    const raw = (profileStrength * 0.82) + (separation * 0.12) + (reliability * 0.06);
+    return Math.round(Math.max(60, Math.min(98, raw * 100)));
   }
 
   function computeResult() {
     const v = userVector();
-    // similaridade de cosseno entre o vetor do jovem e o vetor de cada Casa
-    const scores = HOUSE_KEYS.map((k) => ({ key: k, score: cosine(v, HOUSE_PROFILES[k]) }))
-      .sort((a, b) => b.score - a.score);
 
-    const compat = calculateCompatibility(scores);
+    const scores = HOUSE_KEYS.map((k) => ({
+      key: k,
+      score: cosine(v, HOUSE_PROFILES[k])
+    })).sort((a, b) => b.score - a.score);
 
-    // nível de confiança: distância relativa entre 1º e 2º colocado
+    const consistency = crossCheckConsistency();
+    const compat = calculateCompatibility(scores, consistency);
+
+    const best = scores[0] ? scores[0].score : 0;
     const second = scores[1] ? scores[1].score : 0;
-    const best = scores[0].score;
-    const gap = best > 0 ? ((best - second) / best) * 100 : 0;
+    const gapPoints = Math.max(0, (best - second) * 100);
+
+    // Confiança combina separação entre as Casas e coerência das
+    // respostas de confirmação. Não altera a Casa vencedora.
+    const confidenceScore =
+      (Math.max(0, Math.min(1, gapPoints / 5)) * 0.72) +
+      (consistency * 0.28);
+
     const confidence = {
-      gap: Math.round(gap * 10) / 10,
-      label: gap >= 12 ? "Alta" : gap >= 5 ? "Boa" : "Equilibrada",
-      runnerUp: scores[1] ? HOUSES[scores[1].key].name : ""
+      gap: Math.round(gapPoints * 10) / 10,
+      consistency: Math.round(consistency * 100),
+      label: confidenceScore >= 0.72 ? "Alta" : confidenceScore >= 0.48 ? "Boa" : "Equilibrada",
+      runnerUp: scores[1] ? HOUSES[scores[1].key].name : "",
+      runnerUpKey: scores[1] ? scores[1].key : "",
+      isClose: gapPoints < 3.2
     };
 
-    return { vector: v, winner: scores[0].key, compat, confidence, ranking: scores };
+    return {
+      vector: v,
+      winner: scores[0].key,
+      compat,
+      consistency,
+      confidence,
+      ranking: scores
+    };
   }
 
   /* ---------- revelação cinematográfica ---------- */
@@ -456,6 +590,35 @@
     floatingJoinTimer = window.setTimeout(hideFloatingJoin, FLOATING_JOIN_MS);
   }
 
+  function naturalJoin(items) {
+    if (!items.length) return "";
+    if (items.length === 1) return items[0];
+    if (items.length === 2) return items[0] + " e " + items[1];
+    return items.slice(0, -1).join(", ") + " e " + items[items.length - 1];
+  }
+
+  function personalizedWhyFit(house, topTraits) {
+    const main = topTraits.slice(0, 3);
+    const names = main.map(([trait]) => TRAIT_LABELS[trait].name.toLowerCase());
+    const behaviors = main
+      .map(([trait]) => TRAIT_LABELS[trait].result)
+      .filter(Boolean);
+
+    let text =
+      "Ao longo das suas respostas, apareceram com mais força " +
+      naturalJoin(names) + ". ";
+
+    if (behaviors.length) {
+      text +=
+        "Isso indica uma tendência a " +
+        naturalJoin(behaviors) + ". ";
+    }
+
+    return text +
+      "É a combinação desses traços, e não uma resposta isolada, que aproxima seu perfil da " +
+      house.name + ".";
+  }
+
   function renderResult(result) {
     const house = HOUSES[result.winner];
 
@@ -472,35 +635,51 @@
     $("result-verse").textContent = house.verse;
     $("result-verse-ref").textContent = house.verseRef;
     $("result-desc").textContent = house.description;
-    $("result-whyfit").textContent = house.whyFit;
 
     $("result-live-list").innerHTML = house.whatYouWillLive
       .map((t) => `<li>${t}</li>`)
       .join("");
 
-    // perfil: cinco características mais fortes, em estrelas
+    // Perfil: cinco características mais fortes, em estrelas.
     const entries = Object.entries(result.vector).sort((a, b) => b[1] - a[1]);
     const max = entries[0][1] || 1;
     const top = entries.slice(0, 5);
+    const topThree = top.slice(0, 3);
+
     $("result-profile-list").innerHTML = top
       .map(
         ([t, v]) =>
           `<li><span>${TRAIT_LABELS[t].name}</span>${stars(v, max)}</li>`
       )
       .join("");
+
     $("result-profile-summary").textContent =
-      "Sua caminhada se destaca por " +
-      top.slice(0, 3).map(([t]) => TRAIT_LABELS[t].phrase).join(", ") +
-      ". São esses traços que aproximam você da " + house.name + ".";
+      "Os traços que mais apareceram nas suas respostas foram " +
+      naturalJoin(topThree.map(([t]) => TRAIT_LABELS[t].name.toLowerCase())) +
+      ".";
+
+    // A explicação deixa de ser totalmente fixa por Casa e passa
+    // a usar o perfil realmente construído pelas 12 respostas.
+    $("result-whyfit").textContent = personalizedWhyFit(house, top);
 
     $("compat-value").textContent = result.compat + "%";
     $("compat-track").setAttribute("aria-valuenow", String(result.compat));
-    $("compat-note").textContent =
-      "Confiança do discernimento: " + result.confidence.label +
-      (result.confidence.runnerUp
-        ? " · segunda Casa mais próxima: " + result.confidence.runnerUp +
-          " (" + result.confidence.gap + "% de distância)"
-        : "");
+
+    if (result.confidence.runnerUp && result.confidence.isClose) {
+      $("compat-note").textContent =
+        "Seu perfil também ficou próximo da " +
+        result.confidence.runnerUp +
+        ". A diferença entre as duas Casas foi pequena (" +
+        result.confidence.gap +
+        " p.p.).";
+    } else {
+      $("compat-note").textContent =
+        "Definição do resultado: " +
+        result.confidence.label +
+        " · consistência das respostas: " +
+        result.confidence.consistency +
+        "%.";
+    }
 
     // botão dinâmico de WhatsApp
     const label = $("btn-join-label");
