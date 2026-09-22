@@ -694,7 +694,7 @@ const TRAIT_LABELS = {
     phrase: "sabedoria e discernimento",
     result: "observar com profundidade antes de escolher a melhor forma de agir"
   }
-}
+};
 
 /* Congela os dados de conteúdo para dificultar alterações simples
    via console do navegador. Proteção adicional — não substitui o
