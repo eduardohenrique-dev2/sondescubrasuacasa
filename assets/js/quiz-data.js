@@ -186,7 +186,9 @@ const HOUSES = {
    Banco com 40 perguntas de discernimento baseadas em
    situações pessoais do dia a dia (relações, decisões, rotina,
    fé, desafios, propósito, comunicação, cuidado, iniciativa
-   e serviço), evitando depender de experiências dentro do SON. Cada alternativa distribui pesos
+   e serviço), evitando depender de experiências dentro do SON. As alternativas
+   são formuladas para parecer igualmente plausíveis, reduzindo respostas
+   por desejo de obter uma Casa específica. Cada alternativa distribui pesos
    entre 3 e 4 características, sem apontar diretamente para
    nenhuma Casa. Cada pergunta tem uma "category" (uma das
    CATEGORIES) usada só para garantir variedade no sorteio —
@@ -241,7 +243,7 @@ const QUESTION_POOL = [
     category: "lideranca",
     text: "Um plano com amigos ou família dá errado de última hora. Qual é sua reação mais natural?",
     options: [
-      { text: "Organizo rapidamente as opções e ajudo todos a decidir o próximo passo.", weights: { lideranca: 2, iniciativa: 2, comunicacao: 2, missao: 1 } },
+      { text: "Junto as opções disponíveis e tento transformar a confusão em um próximo passo possível.", weights: { lideranca: 2, iniciativa: 2, comunicacao: 2, missao: 1 } },
       { text: "Vou direto para o problema e começo a resolver o que estiver ao meu alcance.", weights: { servico: 3, perseveranca: 2, iniciativa: 1, missao: 1 } },
       { text: "Primeiro tento acalmar quem ficou mais preocupado com a situação.", weights: { acolhimento: 3, fraternidade: 2, sabedoria: 1, espiritualidade: 1 } },
       { text: "Paro por um instante para entender o que aconteceu antes de agir.", weights: { sabedoria: 3, perseveranca: 2, lideranca: 1, iniciativa: 1 } }
@@ -251,7 +253,7 @@ const QUESTION_POOL = [
     category: "lideranca",
     text: "Quando você precisa organizar algo com outras pessoas, como costuma começar?",
     options: [
-      { text: "Monto um plano, distribuo o que precisa ser feito e combino prazos.", weights: { lideranca: 3, comunicacao: 2, iniciativa: 1 } },
+      { text: "Começo organizando etapas, responsabilidades e o que precisa acontecer primeiro.", weights: { lideranca: 3, comunicacao: 2, iniciativa: 1 } },
       { text: "Pergunto o que cada pessoa prefere ou consegue fazer antes de decidir.", weights: { lideranca: 2, acolhimento: 2, fraternidade: 1, sabedoria: 1 } },
       { text: "Começo fazendo a minha parte e vou puxando os outros pelo exemplo.", weights: { lideranca: 2, servico: 2, iniciativa: 1, perseveranca: 1 } },
       { text: "Busco conselho, reflito e só depois defino como seguir.", weights: { sabedoria: 2, lideranca: 1, espiritualidade: 2 } }
@@ -261,7 +263,7 @@ const QUESTION_POOL = [
     category: "lideranca",
     text: "Quando ninguém se posiciona diante de uma decisão importante, o que você costuma fazer?",
     options: [
-      { text: "Assumo a frente e proponho um caminho claro.", weights: { lideranca: 3, comunicacao: 2, iniciativa: 1 } },
+      { text: "Se vejo um caminho viável, coloco a ideia na mesa para destravar a decisão.", weights: { lideranca: 3, comunicacao: 2, iniciativa: 1 } },
       { text: "Dou uma sugestão, mas prefiro construir a decisão junto com todos.", weights: { lideranca: 2, fraternidade: 2, comunicacao: 1, sabedoria: 1 } },
       { text: "Espero um pouco, observo e só me posiciono quando entendo melhor o cenário.", weights: { sabedoria: 2, perseveranca: 1, lideranca: 1 } },
       { text: "Estimulo alguém a se expressar e ajudo a conversa a avançar.", weights: { lideranca: 2, acolhimento: 2, comunicacao: 1 } }
@@ -303,7 +305,7 @@ const QUESTION_POOL = [
     category: "espiritualidade",
     text: "Antes de uma decisão realmente importante na sua vida, o que você costuma fazer primeiro?",
     options: [
-      { text: "Busco um tempo de oração e silêncio.", weights: { espiritualidade: 3, sabedoria: 1 } },
+      { text: "Procuro me afastar do ruído por um momento e colocar a decisão diante de Deus.", weights: { espiritualidade: 3, sabedoria: 1 } },
       { text: "Converso com alguém de confiança que compartilha da minha fé.", weights: { espiritualidade: 2, fraternidade: 2, sabedoria: 1 } },
       { text: "Penso sozinho nos prós, contras e consequências.", weights: { sabedoria: 2, espiritualidade: 1, perseveranca: 1 } },
       { text: "Dou atenção ao que meu coração está dizendo naquele momento.", weights: { espiritualidade: 2, iniciativa: 1 } }
@@ -325,7 +327,7 @@ const QUESTION_POOL = [
     category: "fraternidade",
     text: "Em um ambiente social, você percebe alguém sozinho enquanto os outros já estão conversando. O que faz?",
     options: [
-      { text: "Vou conversar com essa pessoa para que ela se sinta à vontade.", weights: { acolhimento: 3, comunicacao: 2, fraternidade: 2 } },
+      { text: "Encontro uma forma natural de me aproximar para que ela não precise dar o primeiro passo sozinha.", weights: { acolhimento: 3, comunicacao: 2, fraternidade: 2 } },
       { text: "Chamo outras pessoas e ajudo a criar uma roda em que ela possa entrar.", weights: { lideranca: 2, fraternidade: 2, comunicacao: 2, missao: 1 } },
       { text: "Observo um pouco antes para entender qual aproximação seria mais confortável.", weights: { sabedoria: 3, acolhimento: 2, espiritualidade: 1, perseveranca: 1 } },
       { text: "Convido a pessoa para participar comigo de alguma atividade ou conversa.", weights: { iniciativa: 2, servico: 2, acolhimento: 2, missao: 1 } }
@@ -337,7 +339,7 @@ const QUESTION_POOL = [
     options: [
       { text: "Fico perto, mesmo que eu não tenha as palavras certas.", weights: { fraternidade: 3, acolhimento: 2 } },
       { text: "Procuro envolver outras pessoas de confiança para criar uma rede de apoio.", weights: { lideranca: 1, fraternidade: 2, comunicacao: 1 } },
-      { text: "Rezo por ele e também tento ajudar de forma prática.", weights: { espiritualidade: 2, servico: 2, fraternidade: 1 } },
+      { text: "Uno as duas coisas: coloco a pessoa em oração e procuro perceber uma ajuda concreta possível.", weights: { espiritualidade: 2, servico: 2, fraternidade: 1 } },
       { text: "Respeito o espaço dele, mas deixo claro que estou disponível.", weights: { sabedoria: 1, fraternidade: 2, acolhimento: 1 } }
     ]
   },
@@ -387,7 +389,7 @@ const QUESTION_POOL = [
     category: "missao",
     text: "Surge uma oportunidade de participar de uma ação que ajuda outras pessoas. Qual papel aparece mais naturalmente em você?",
     options: [
-      { text: "Ajudo a planejar como tudo vai acontecer.", weights: { lideranca: 2, missao: 2, iniciativa: 1 } },
+      { text: "Antes de começar, gosto de visualizar etapas e possíveis imprevistos.", weights: { lideranca: 2, missao: 2, iniciativa: 1 } },
       { text: "Quero estar perto das pessoas, conversar e criar vínculo.", weights: { comunicacao: 2, missao: 2, fraternidade: 1 } },
       { text: "Cuido de detalhes e tarefas práticas para que as coisas funcionem.", weights: { servico: 2, missao: 1, iniciativa: 1, perseveranca: 1 } },
       { text: "Antes e durante a ação, sinto necessidade de sustentá-la também pela oração.", weights: { espiritualidade: 2, missao: 3 } }
@@ -419,7 +421,7 @@ const QUESTION_POOL = [
     category: "comunicacao",
     text: "Quando você precisa contar uma novidade importante para várias pessoas, como prefere fazer?",
     options: [
-      { text: "Falo de forma direta, clara e com entusiasmo.", weights: { comunicacao: 3, lideranca: 2, iniciativa: 1 } },
+      { text: "Organizo o que quero dizer e prefiro comunicar de um jeito que mobilize as pessoas.", weights: { comunicacao: 3, lideranca: 2, iniciativa: 1 } },
       { text: "Converso primeiro com algumas pessoas mais próximas antes de falar com todos.", weights: { comunicacao: 2, sabedoria: 2, fraternidade: 1, lideranca: 1 } },
       { text: "Organizo as informações para ter certeza de que ninguém vai ficar confuso.", weights: { comunicacao: 2, servico: 2, iniciativa: 1 } },
       { text: "Penso, rezo e busco as palavras certas antes de falar.", weights: { espiritualidade: 2, comunicacao: 2, sabedoria: 1 } }
@@ -471,7 +473,7 @@ const QUESTION_POOL = [
     category: "servico",
     text: "Existe uma tarefa desagradável que ninguém quer fazer. Qual reação é mais comum em você?",
     options: [
-      { text: "Faço sem esperar que alguém me peça.", weights: { servico: 3, iniciativa: 1 } },
+      { text: "Se percebo que precisa ser feito, geralmente começo antes de alguém distribuir a tarefa.", weights: { servico: 3, iniciativa: 1 } },
       { text: "Prefiro chamar alguém e fazer junto para ficar mais leve.", weights: { servico: 2, fraternidade: 2 } },
       { text: "Transformo aquilo em uma oferta e tento fazer com boa disposição.", weights: { espiritualidade: 2, servico: 2 } },
       { text: "Sugiro dividir a tarefa para que o peso não fique em uma pessoa só.", weights: { lideranca: 1, servico: 2, comunicacao: 1 } }
@@ -493,7 +495,7 @@ const QUESTION_POOL = [
     category: "iniciativa",
     text: "Você percebe uma oportunidade de começar algo novo na sua vida. Qual é sua tendência inicial?",
     options: [
-      { text: "Monto um plano e já penso em como tirar a ideia do papel.", weights: { lideranca: 3, iniciativa: 2, missao: 2, comunicacao: 1 } },
+      { text: "Minha cabeça já começa a ligar a ideia a primeiros passos concretos.", weights: { lideranca: 3, iniciativa: 2, missao: 2, comunicacao: 1 } },
       { text: "Começo imaginando formas diferentes e criativas de fazer aquilo acontecer.", weights: { comunicacao: 2, missao: 2, sabedoria: 2, iniciativa: 1 } },
       { text: "Penso em quem poderia fazer parte comigo e como incluir essas pessoas.", weights: { acolhimento: 3, fraternidade: 2, servico: 1, espiritualidade: 1 } },
       { text: "Prefiro cuidar dos detalhes e fazer a ideia funcionar bem, mesmo sem aparecer.", weights: { servico: 3, perseveranca: 2, espiritualidade: 1, fraternidade: 1 } }
@@ -513,7 +515,7 @@ const QUESTION_POOL = [
     category: "iniciativa",
     text: "Surge uma oportunidade nova que parece interessante, mas você ainda não sabe todos os detalhes. Como reage?",
     options: [
-      { text: "Demonstro interesse e começo a explorar a oportunidade logo.", weights: { iniciativa: 3, comunicacao: 2 } },
+      { text: "Costumo experimentar um primeiro movimento antes de ter todas as respostas.", weights: { iniciativa: 3, comunicacao: 2 } },
       { text: "Prefiro pesquisar e pensar bastante antes de me comprometer.", weights: { sabedoria: 2, iniciativa: 1, perseveranca: 1 } },
       { text: "Converso com pessoas próximas para ouvir outras perspectivas.", weights: { fraternidade: 2, iniciativa: 1, comunicacao: 1 } },
       { text: "Espero alguém tomar a frente e, se fizer sentido, ajudo a colocar em prática.", weights: { servico: 2, perseveranca: 1, iniciativa: 1 } }
@@ -523,7 +525,7 @@ const QUESTION_POOL = [
     category: "iniciativa",
     text: "Um plano importante muda completamente de última hora. Qual é sua reação mais natural?",
     options: [
-      { text: "Penso rapidamente em uma alternativa e proponho um novo caminho.", weights: { iniciativa: 3, lideranca: 1, sabedoria: 1 } },
+      { text: "Minha reação é procurar uma saída possível e colocá-la em teste.", weights: { iniciativa: 3, lideranca: 1, sabedoria: 1 } },
       { text: "Me adapto à solução escolhida e ajudo a fazê-la funcionar.", weights: { servico: 2, perseveranca: 1, iniciativa: 1 } },
       { text: "Tento manter as pessoas tranquilas enquanto a situação se reorganiza.", weights: { acolhimento: 2, fraternidade: 1, iniciativa: 1 } },
       { text: "Confio, rezo e procuro perceber qual caminho faz mais sentido agora.", weights: { espiritualidade: 2, sabedoria: 1, iniciativa: 1 } }
@@ -545,7 +547,7 @@ const QUESTION_POOL = [
     category: "perseveranca",
     text: "Você assumiu um compromisso importante justamente em uma semana muito cansativa. Como tende a agir?",
     options: [
-      { text: "Cumpro o que prometi porque dei minha palavra.", weights: { perseveranca: 3, servico: 1 } },
+      { text: "Tendo assumido o compromisso, minha primeira tendência é reorganizar o resto para conseguir cumpri-lo.", weights: { perseveranca: 3, servico: 1 } },
       { text: "Reconheço meu limite, aviso com responsabilidade e me reorganizo para não abandonar o compromisso.", weights: { sabedoria: 2, perseveranca: 1, comunicacao: 1 } },
       { text: "Peço força a Deus para atravessar o cansaço e seguir.", weights: { espiritualidade: 2, perseveranca: 2 } },
       { text: "Faço um esforço para estar presente porque sei que outras pessoas contam comigo.", weights: { fraternidade: 2, perseveranca: 2 } }
@@ -565,7 +567,7 @@ const QUESTION_POOL = [
     category: "perseveranca",
     text: "Depois de meses se dedicando a uma meta, o resultado não aparece como você esperava. Como reage?",
     options: [
-      { text: "Continuo, acreditando que o esforço ainda pode dar fruto.", weights: { perseveranca: 3, espiritualidade: 1 } },
+      { text: "Antes de abandonar, costumo dar mais tempo ao processo e observar se o esforço ainda pode amadurecer.", weights: { perseveranca: 3, espiritualidade: 1 } },
       { text: "Reviso o que posso fazer diferente e preparo uma nova tentativa.", weights: { sabedoria: 2, perseveranca: 1, lideranca: 1 } },
       { text: "Tento agradecer pelo que aprendi, mesmo sentindo frustração.", weights: { espiritualidade: 2, perseveranca: 1, sabedoria: 1 } },
       { text: "Procuro encorajar também quem caminhou comigo para ninguém desanimar.", weights: { comunicacao: 1, fraternidade: 1, perseveranca: 2 } }
@@ -577,7 +579,7 @@ const QUESTION_POOL = [
     category: "sabedoria",
     text: "Você recebe uma responsabilidade grande e percebe que suas decisões vão afetar outras pessoas. Qual atitude mais representa você?",
     options: [
-      { text: "Aceito o desafio e procuro conduzir pelo exemplo.", weights: { lideranca: 3, missao: 2, comunicacao: 2 } },
+      { text: "Aceito a responsabilidade e tento fazer minhas atitudes falarem antes das cobranças.", weights: { lideranca: 3, missao: 2, comunicacao: 2 } },
       { text: "Quero caminhar perto das pessoas e ajudá-las a crescer junto comigo.", weights: { fraternidade: 3, acolhimento: 2, espiritualidade: 2 } },
       { text: "Estou disposto a fazer o que for necessário, mesmo sem reconhecimento.", weights: { servico: 3, perseveranca: 2, espiritualidade: 2 } },
       { text: "Antes de definir qualquer direção, busco discernir com profundidade o que Deus espera de mim.", weights: { sabedoria: 3, espiritualidade: 3, missao: 1 } }
@@ -609,7 +611,7 @@ const QUESTION_POOL = [
     options: [
       { text: "Penso com calma antes de responder.", weights: { sabedoria: 3, perseveranca: 1 } },
       { text: "Agradeço e tento identificar o que realmente posso melhorar.", weights: { sabedoria: 2, servico: 1, acolhimento: 1 } },
-      { text: "Levo aquilo para a oração antes de tirar uma conclusão.", weights: { espiritualidade: 2, sabedoria: 2 } },
+      { text: "Evito concluir na hora e procuro colocar aquilo diante de Deus antes de reagir.", weights: { espiritualidade: 2, sabedoria: 2 } },
       { text: "Converso com a pessoa para compreender melhor o que ela quis dizer.", weights: { comunicacao: 2, sabedoria: 2 } }
     ]
   }
@@ -620,11 +622,11 @@ const QUESTION_POOL = [
    6. PROGRESS_MESSAGES — durante o quiz
 ======================================================= */
 const PROGRESS_MESSAGES = [
-  { until: 0.15, text: "Estamos conhecendo sua caminhada" },
-  { until: 0.4,  text: "Cada resposta revela um pouco mais da sua missão" },
-  { until: 0.7,  text: "Discernindo seus dons" },
+  { until: 0.15, text: "Conhecendo seu jeito de perceber as situações" },
+  { until: 0.4,  text: "Conectando padrões das suas respostas" },
+  { until: 0.7,  text: "Seu perfil está ficando mais nítido" },
   { until: 0.95, text: "Quase lá" },
-  { until: 1.01, text: "Preparando sua Casa" }
+  { until: 1.01, text: "Preparando seu resultado" }
 ];
 
 /* =======================================================
@@ -632,9 +634,9 @@ const PROGRESS_MESSAGES = [
    A ordem é exatamente a ordem exibida na tela.
 ======================================================= */
 const LOADING_SEQUENCE = [
-  "Analisando sua caminhada...",
-  "Comparando seu perfil...",
-  "Discernindo sua missão...",
+  "Analisando suas respostas...",
+  "Cruzando padrões do seu perfil...",
+  "Comparando suas afinidades...",
   "Preparando sua Casa..."
 ];
 
@@ -642,17 +644,57 @@ const LOADING_SEQUENCE = [
    8. TRAIT_LABELS — usados na seção de perfil
 ======================================================= */
 const TRAIT_LABELS = {
-  lideranca:       { name: "Liderança",       phrase: "liderança e visão" },
-  comunicacao:     { name: "Comunicação",     phrase: "comunicação clara" },
-  missao:          { name: "Missão",          phrase: "compromisso missionário" },
-  iniciativa:      { name: "Iniciativa",      phrase: "iniciativa e coragem" },
-  espiritualidade: { name: "Espiritualidade", phrase: "profundidade espiritual" },
-  fraternidade:    { name: "Fraternidade",    phrase: "espírito fraterno" },
-  acolhimento:     { name: "Acolhimento",     phrase: "acolhimento e cuidado" },
-  servico:         { name: "Serviço",         phrase: "dedicação ao serviço" },
-  perseveranca:    { name: "Perseverança",    phrase: "perseverança e constância" },
-  sabedoria:       { name: "Sabedoria",       phrase: "sabedoria e discernimento" }
-};
+  lideranca: {
+    name: "Liderança",
+    phrase: "liderança e visão",
+    result: "assumir responsabilidade e dar direção quando uma situação precisa avançar"
+  },
+  comunicacao: {
+    name: "Comunicação",
+    phrase: "comunicação clara",
+    result: "transformar ideias e sentimentos em pontes com outras pessoas"
+  },
+  missao: {
+    name: "Missão",
+    phrase: "senso de propósito",
+    result: "buscar um propósito que vá além do próprio interesse"
+  },
+  iniciativa: {
+    name: "Iniciativa",
+    phrase: "iniciativa e coragem",
+    result: "começar movimentos e testar caminhos sem depender sempre de um primeiro empurrão"
+  },
+  espiritualidade: {
+    name: "Espiritualidade",
+    phrase: "profundidade espiritual",
+    result: "buscar Deus como referência para suas escolhas e para o sentido do que vive"
+  },
+  fraternidade: {
+    name: "Fraternidade",
+    phrase: "espírito fraterno",
+    result: "valorizar vínculos, presença e crescimento compartilhado"
+  },
+  acolhimento: {
+    name: "Acolhimento",
+    phrase: "acolhimento e cuidado",
+    result: "perceber quem está ao redor e criar espaço para que as pessoas se sintam seguras"
+  },
+  servico: {
+    name: "Serviço",
+    phrase: "dedicação ao serviço",
+    result: "ajudar de forma concreta, inclusive quando isso não traz reconhecimento"
+  },
+  perseveranca: {
+    name: "Perseverança",
+    phrase: "perseverança e constância",
+    result: "continuar quando o entusiasmo inicial passa e o caminho fica mais exigente"
+  },
+  sabedoria: {
+    name: "Sabedoria",
+    phrase: "sabedoria e discernimento",
+    result: "observar com profundidade antes de escolher a melhor forma de agir"
+  }
+}
 
 /* Congela os dados de conteúdo para dificultar alterações simples
    via console do navegador. Proteção adicional — não substitui o
