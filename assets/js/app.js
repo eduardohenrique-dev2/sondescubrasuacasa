@@ -8,7 +8,7 @@
      (quiz-data.js -> QUESTION_POOL), garantindo uma de cada
      categoria + duas confirmações cruzadas, mantendo perguntas
      equivalentes afastadas e embaralhando todas as alternativas.
-     no clique de "Descobrir minha Casa" (ver init -> btn-start).
+     O conjunto é montado no clique de "Descobrir minha Casa".
    - registerAttempt()/saveAttempt()/loadAttempts() controlam,
      via localStorage, quantas vezes o teste foi feito neste
      dispositivo e mantêm um histórico das últimas 10 tentativas.
@@ -123,11 +123,8 @@
     return QUESTION_POOL;
   }
 
-  // Sorteia `count` perguntas garantindo, sempre que possível,
-  // pelo menos uma de cada categoria — depois completa o restante
-  // aleatoriamente e embaralha a ordem final. As alternativas de
-  // cada pergunta também são embaralhadas, em uma cópia própria
-  // da sessão (o banco original nunca é alterado).
+  // Verifica se as perguntas de confirmação da mesma categoria
+  // ficaram suficientemente afastadas no percurso.
   function categoriesAreWellSpaced(list, minGap) {
     const positions = {};
     list.forEach((q, index) => {
